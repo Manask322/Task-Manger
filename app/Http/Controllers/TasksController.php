@@ -16,22 +16,39 @@ class TasksController extends Controller
      */
     public function index(Request $request)
     {
+        if($request->page_id < 1){
+            return response()->json([
+                "Message" => "Enter valid page number."
+            ],400);
+        }
+        $offset = ($request->page_id - 1)*3;
         $tasks = Tasks::where([
             ['status','=','todo'],
             ['team_id', '=' , $request->team_id]
-        ])->select('id','title','description','assignee_id','status')->get();
+        ])->select('id','title','description','assignee_id','status')->orderBy('title', 'desc')->offset($offset)->limit(3)->get();
         $tasks = $tasks->toJson(JSON_PRETTY_PRINT);
         return response($tasks,200);
     }
 
     public function member_index(Request $request)
     {
+        if($request->page_id < 1){
+            return response()->json([
+                "Message" => "Enter valid page number."
+            ],400);
+        }
+        $offset = ($request->page_id - 1)*3;
         $tasks = Tasks::where([
             ['status','=','todo'],
             ['team_id', '=' , $request->team_id],
             ['assignee_id', '=' , $request->member_id]
-        ])->select('id','title','description','assignee_id','status')->get();
+        ])->select('id','title','description','assignee_id','status')->orderBy('title', 'desc')->offset($offset)->limit(3)->get();
         $tasks = $tasks->toJson(JSON_PRETTY_PRINT);
+        if( strlen($tasks) <= 2 ){
+            return response()->json([
+                "Message" => "No Record found for the given page number, please retry with another page number."
+            ],200);
+        }
         return response($tasks,200);
     }
 
