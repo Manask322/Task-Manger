@@ -22,10 +22,7 @@ class TasksController extends Controller
             ],400);
         }
         $offset = ($request->page_id - 1)*3;
-        $tasks = Tasks::where([
-            ['status','=','todo'],
-            ['team_id', '=' , $request->team_id]
-        ])->select('id','title','description','assignee_id','status')->orderBy('title', 'desc')->offset($offset)->limit(3)->get();
+        $tasks = Tasks::get_team_tasks($request->team_id)->select('id','title','description','assignee_id','status')->orderBy('title', 'desc')->offset($offset)->limit(3)->get();
         $tasks = $tasks->toJson(JSON_PRETTY_PRINT);
         return response($tasks,200);
     }
@@ -38,11 +35,7 @@ class TasksController extends Controller
             ],400);
         }
         $offset = ($request->page_id - 1)*3;
-        $tasks = Tasks::where([
-            ['status','=','todo'],
-            ['team_id', '=' , $request->team_id],
-            ['assignee_id', '=' , $request->member_id]
-        ])->select('id','title','description','assignee_id','status')->orderBy('title', 'desc')->offset($offset)->limit(3)->get();
+        $tasks = Tasks::get_assignee_tasks($request->team_id,$request->member_id)->select('id','title','description','assignee_id','status')->orderBy('title', 'desc')->offset($offset)->limit(3)->get();
         $tasks = $tasks->toJson(JSON_PRETTY_PRINT);
         if( strlen($tasks) <= 2 ){
             return response()->json([
@@ -72,10 +65,7 @@ class TasksController extends Controller
                 ],400);
             }
         }
-        $member = TeamMembers::where([
-            ['id','=',$request->assignee_id],
-            ['team_id','=',$request->team_id]
-        ])->get();
+        $member = TeamMembers::get_team_member($request->assignee_id,$request->team_id)->get();
         if ( count($member) == 0 && (strlen($request->assignee_id) != 0) ){
             return response()->json([
                 'Message' => "assignee_id should belong to the same team as the task.",
@@ -109,15 +99,12 @@ class TasksController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Tasks  $tasks
+     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function show(Request $request)
     {
-        $task = Tasks::where([
-            ['id' , '=', $request->id],
-            ['team_id', '=' , $request->team_id]
-        ])->select('id','title','description','assignee_id','status')->get()->first();
+        $task = Tasks::where('id',$request->id)->select('id','title','description','assignee_id','status')->get()->first();
         if( !$task ){
             return response()->json([
                 "Message" => "Task Not Found."
@@ -155,10 +142,7 @@ class TasksController extends Controller
             ],400);
         }
         if( $request->assignee_id ){
-            $member = TeamMembers::where([
-                ['id','=',$request->assignee_id],
-                ['team_id','=',$request->team_id]
-            ])->get()->first();
+            $member = TeamMembers::get_team_member($request->assignee_id,$request->team_id)->get()->first();
             if ( is_null($member) ){
                 return response()->json([
                     'Message' => "assignee_id should belong to the same team as the task.",

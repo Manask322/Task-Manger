@@ -1,61 +1,165 @@
-<p align="center"><img src="https://res.cloudinary.com/dtfbvvkyp/image/upload/v1566331377/laravel-logolockup-cmyk-red.svg" width="400"></p>
+# Task Manager
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/d/total.svg" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/v/stable.svg" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/license.svg" alt="License"></a>
-</p>
 
-## About Laravel
+## Steps to run the app locally:
+* `git clone https://github.com/Manask322/Task-Manger`
+* cd to the project
+* go to `.env` and change the database credentials.
+* `php artisan migrate`
+* `php artisan serve`
+* the application starts on `localhost:8000`
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Steps to run app using docker container:
+* install docker 
+* open terminal
+* `git clone https://github.com/Manask322/Task-Manger`
+* cd to the project.
+* run `docker compose up --remove-orphans`
+* the application starts on `localhost:8000`
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### API endpoints available
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+```json5
+POST /teams
+request:
 
-## Learning Laravel
+{
+  "name":"Platform",
+}
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+response:
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+{
+  "id":"b7f32a21-b863-4dd1-bd86-e99e8961ffc6",
+  "name”: “Platform”,
+}
+id should be uuid,
+name should be string
+```
+```json5
 
-## Laravel Sponsors
+GET /teams/:id
+response:
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+{
+  "id":"b7f32a21-b863-4dd1-bd86-e99e8961ffc6",
+  "name”: “Platform”
+}
+```
+```json5
 
-### Premium Partners
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[OP.GG](https://op.gg)**
+POST /teams/:id/member
+request:
+{
+	"name": "Vv",
+	"email": "venkat.v@razorpay.com"
+}
+Response:
+{
+	"id": "b7f32a21-b863-4dd1-bd86-e99e8961ffc6",
+	"name": "Vv",
+	"email": "venkat.v@razorpay.com"
+}
+In case email is already associated with someone in the team, throw an error message saying
+"Email already associated with a team member"
+```
+```json5
 
-## Contributing
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+DELETE /teams/:id/members/:id2
 
-## Code of Conduct
+response:
+HTTP 204 No Content
+In case there are tasks assigned to the member, show a message saying:
+"Member cannot be deleted, please reassign all tasks from this member to someone else before trying again"
+```
+```json5
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
 
-## Security Vulnerabilities
+POST /teams/:id/tasks
+request:
+{
+"title": "Deploy app on stage", //mandatory
+"description" : "We have built a new app which needs to be tested thoroughly", //optional
+"assignee_id": "some member id from the same team", // optional 
+"status": "todo"
+}
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+response:
+{
+"id": "2a913e52-81ea-4987-874d-820969a62ea6",
+"title": "Deploy app on stage", //mandatory
+"description" : "We have built a new app which needs to be tested thoroughly", //optional
+"assignee_id": "some member id from the same team", // optional
+"status": "todo" 
+}
+assignee_id should belong to the same team as the task.  Else raise an error
+Status can be todo or done
+```
+```json5
 
-## License
+GET /teams/:id/tasks/:id2
+response:
+{
+"id": "2a913e52-81ea-4987-874d-820969a62ea6",
+"title": "Deploy app on stage", //mandatory
+"description" : "We have built a new app which needs to be tested thoroughly", //optional
+"assignee_id": "some member id from the same team", // optional
+"status": "todo" 
+}
+```
+```json5
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+PATCH /teams/:id/tasks/:id2
+request:
+{
+"title": "Deploy app on preprod",//optional
+"description":"new description",//optional
+"assignee_id": "745dbe00-2520-420a-985d-0c3f5d280e57",//optional
+"status": "done"
+}
+response:
+{
+"id": "2a913e52-81ea-4987-874d-820969a62ea6",
+"title": "Deploy app on preprod",//optional
+"description":"new description",//optional
+"assignee_id": "745dbe00-2520-420a-985d-0c3f5d280e57",
+"status": "done"
+}
+assignee_id should belong to the same team as the task.  Else raise an error
+Status can be todo or done
+```
+```json5
+
+GET /teams/:id/tasks/
+response:
+[
+{
+"id": "2a913e52-81ea-4987-874d-820969a62ea6",
+"title": "Deploy app on preprod",//optional
+"description":"new description",//optional
+"assignee_id": "745dbe00-2520-420a-985d-0c3f5d280e57",
+"status": "todo"
+},
+]
+List of all tasks for a team in todo status
+```
+```json5
+
+GET /teams/:id/members/:id2/tasks/
+response:
+[
+{
+"id": "2a913e52-81ea-4987-874d-820969a62ea6",
+"title": "Deploy app on preprod",//optional
+"description":"new description",//optional
+"assignee_id": "745dbe00-2520-420a-985d-0c3f5d280e57",
+"status": "todo"
+},
+]
+List of all tasks for a member in the team in todo status
+
+
+
+```

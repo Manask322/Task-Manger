@@ -21,7 +21,7 @@ Route::post('/team','TeamsController@store');
 Route::get('/team/{id}','TeamsController@show');
 Route::post('/team/{team_id}/member','TeamMembersController@store');
 Route::post('/team/{team_id}/tasks','TasksController@store');
-Route::get('/team/{team_id}/tasks/{page_id}','TasksController@index');
+Route::get('/team/{team_id}/tasks/{page_id}','TasksController@index')->where('page_id', '[0-9]+');;
 Route::get('/team/{team_id}/members/{member_id}/tasks/{page_id}','TasksController@member_index');
 Route::get('/team/{team_id}/tasks/{id}','TasksController@show');
 Route::patch('/team/{team_id}/tasks/{id}','TasksController@update');
